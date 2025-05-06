@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors for our AI chat application
+				'ai-purple': '#8B5CF6',
+				'ai-purple-light': '#A78BFA',
+				'ai-purple-dark': '#7C3AED',
+				'ai-neutral-bg': '#F9FAFB',
+				'ai-text-dark': '#1A1F2C',
+				'ai-gray-light': '#E5E7EB',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +92,17 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'pulse-dot': {
+					'0%': { opacity: '0.4' },
+					'50%': { opacity: '1' },
+					'100%': { opacity: '0.4' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-dot': 'pulse-dot 1.5s infinite ease-in-out',
 			}
 		}
 	},
