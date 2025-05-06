@@ -4,7 +4,8 @@ import ChatHeader from '@/components/ChatHeader';
 import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import LoadingDots from '@/components/LoadingDots';
-import { Message } from '@/types/chat';
+import ApiProviderSelector from '@/components/ApiProviderSelector';
+import { Message, ApiProvider } from '@/types/chat';
 import { getAiResponse } from '@/services/aiService';
 import { toast } from '@/components/ui/sonner';
 import { MessageSquare } from 'lucide-react';
@@ -18,6 +19,7 @@ const Index = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiProvider, setApiProvider] = useState<ApiProvider>('mock');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -40,8 +42,8 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      // Get AI response
-      const response = await getAiResponse(content);
+      // Get AI response using the selected provider
+      const response = await getAiResponse(content, apiProvider);
       
       // Add AI response
       const aiMessage: Message = {
@@ -59,10 +61,22 @@ const Index = () => {
     }
   };
 
+  const handleProviderChange = (provider: ApiProvider) => {
+    setApiProvider(provider);
+    toast.success(`已切换到 ${provider === 'mock' ? '模拟API' : provider === 'openai' ? 'OpenAI' : '豆包AI'}`);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-ai-neutral-bg">
       <div className="w-full max-w-4xl mx-auto p-4 flex-1 overflow-hidden flex flex-col">
         <ChatHeader />
+        
+        <div className="mt-4">
+          <ApiProviderSelector 
+            selectedProvider={apiProvider} 
+            onProviderChange={handleProviderChange} 
+          />
+        </div>
         
         <div className="flex-1 overflow-y-auto py-4 px-2">
           {messages.map((message) => (
