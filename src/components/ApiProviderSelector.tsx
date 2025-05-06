@@ -11,6 +11,7 @@ interface ApiProviderSelectorProps {
 const providers: ApiProviderOption[] = [
   { id: 'mock', name: '模拟API' },
   { id: 'openai', name: 'OpenAI' },
+  { id: 'deepseek', name: 'Deepseek' },
   { id: 'doubao', name: '豆包AI' },
 ];
 

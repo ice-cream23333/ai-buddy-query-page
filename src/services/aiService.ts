@@ -1,5 +1,5 @@
 
-import { ApiProvider } from '@/types/chat';
+import { ApiProvider, CHAT_STORAGE_KEY, Message } from '@/types/chat';
 
 // This is a temporary mock service that will be replaced with the actual AI API integration
 export interface AiResponse {
@@ -19,6 +19,8 @@ export const getAiResponse = async (message: string, provider: ApiProvider = 'mo
     return { message: `[OpenAI] ${getMockResponse(message)}` };
   } else if (provider === 'doubao') {
     return { message: `[豆包] ${getMockResponse(message)}` };
+  } else if (provider === 'deepseek') {
+    return { message: `[Deepseek] ${getMockResponse(message)}` };
   } else {
     // Default mock provider
     return { message: getMockResponse(message) };
@@ -42,3 +44,32 @@ function getMockResponse(message: string): string {
   // Default response
   return '感谢您的提问。目前我是一个简单的模拟AI，还无法处理复杂的问题。将来会连接到真实的AI API来为您提供更准确的回答。';
 }
+
+// 保存聊天记录到本地存储
+export const saveChatsToLocal = (messages: Message[]): void => {
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  } catch (error) {
+    console.error('保存聊天记录失败:', error);
+  }
+};
+
+// 从本地存储加载聊天记录
+export const loadChatsFromLocal = (): Message[] => {
+  try {
+    const savedChats = localStorage.getItem(CHAT_STORAGE_KEY);
+    return savedChats ? JSON.parse(savedChats) : [];
+  } catch (error) {
+    console.error('加载聊天记录失败:', error);
+    return [];
+  }
+};
+
+// 清除本地存储的聊天记录
+export const clearLocalChats = (): void => {
+  try {
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+  } catch (error) {
+    console.error('清除聊天记录失败:', error);
+  }
+};
