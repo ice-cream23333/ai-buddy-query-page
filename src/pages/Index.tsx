@@ -82,6 +82,19 @@ const Index = () => {
     }
   };
 
+  const handleRateMessage = (messageId: string, rating: 'like' | 'dislike') => {
+    setMessages(prevMessages => 
+      prevMessages.map(message => 
+        message.id === messageId 
+          ? { ...message, rating: message.rating === rating ? undefined : rating }
+          : message
+      )
+    );
+    
+    const ratingText = rating === 'like' ? '👍 感谢您的正面反馈' : '👎 感谢您的反馈，我们会努力改进';
+    toast.success(ratingText);
+  };
+
   const handleProviderChange = (provider: ApiProvider) => {
     setApiProvider(provider);
     const providerName = 
@@ -165,8 +178,8 @@ const Index = () => {
           {messages.map((message) => (
             <ChatMessage 
               key={message.id}
-              message={message.content}
-              isAi={message.isAi}
+              message={message}
+              onRateMessage={handleRateMessage}
             />
           ))}
           

@@ -4,6 +4,7 @@ export interface Message {
   content: string;
   isAi: boolean;
   provider?: ApiProvider;
+  rating?: 'like' | 'dislike'; // Added rating field
 }
 
 export type ApiProvider = 'doubao' | 'openai' | 'deepseek' | 'mock';
