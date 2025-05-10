@@ -1,20 +1,19 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import ChatHeader from '@/components/ChatHeader';
-import ChatMessage from '@/components/ChatMessage';
 import ChatInput from '@/components/ChatInput';
 import LoadingDots from '@/components/LoadingDots';
-import ApiProviderSelector from '@/components/ApiProviderSelector';
-import { Message, ApiProvider, CHAT_STORAGE_KEY } from '@/types/chat';
-import { getAiResponse, saveChatsToLocal, loadChatsFromLocal } from '@/services/aiService';
+import AiResponseComparison from '@/components/AiResponseComparison';
+import { Message, ApiProvider, UserQuestion } from '@/types/chat';
+import { getAllAiResponses, saveChatsToLocal, loadChatsFromLocal } from '@/services/aiService';
 import { toast } from '@/components/ui/sonner';
-import { MessageSquare, FileText, Database } from 'lucide-react';
+import { FileText, Database, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [questions, setQuestions] = useState<UserQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [apiProvider, setApiProvider] = useState<ApiProvider>('mock');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 加载本地存储的聊天记录
@@ -22,12 +21,29 @@ const Index = () => {
     const savedMessages = loadChatsFromLocal();
     if (savedMessages && savedMessages.length > 0) {
       setMessages(savedMessages);
+      
+      // 从保存的消息中提取问题
+      const extractedQuestions: UserQuestion[] = [];
+      const seenQuestions = new Set();
+      
+      savedMessages.forEach((msg) => {
+        if (!msg.isAi && !seenQuestions.has(msg.content)) {
+          extractedQuestions.push({
+            id: msg.id,
+            content: msg.content,
+            timestamp: parseInt(msg.id)
+          });
+          seenQuestions.add(msg.content);
+        }
+      });
+      
+      setQuestions(extractedQuestions);
     } else {
       // 如果没有本地存储的聊天记录，设置初始欢迎消息
       setMessages([
         {
           id: '1',
-          content: '欢迎使用AI助手！请问有什么可以帮您的？',
+          content: '欢迎使用AI助手！您可以输入问题，同时获得三个AI的回答并进行对比。',
           isAi: true,
           provider: 'mock'
         }
@@ -48,34 +64,56 @@ const Index = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, questions]);
+
+  // 获取与问题相关的所有AI响应
+  const getResponsesForQuestion = (questionId: string) => {
+    return messages.filter(msg => 
+      msg.isAi && 
+      messages.findIndex(m => m.id === questionId) < messages.indexOf(msg) && 
+      (messages.find(m => 
+        m.id > msg.id && 
+        !m.isAi && 
+        messages.indexOf(m) > messages.indexOf(msg)
+      ) === undefined)
+    );
+  };
 
   const handleSendMessage = async (content: string) => {
-    // Add user message
+    const questionId = Date.now().toString();
+    
+    // 添加用户问题
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: questionId,
       content,
       isAi: false
     };
     
+    const newQuestion: UserQuestion = {
+      id: questionId,
+      content,
+      timestamp: Date.now()
+    };
+    
     setMessages(prev => [...prev, userMessage]);
+    setQuestions(prev => [...prev, newQuestion]);
     setIsLoading(true);
 
     try {
-      // Get AI response using the selected provider
-      const response = await getAiResponse(content, apiProvider);
+      // 获取所有AI提供商的响应
+      const responses = await getAllAiResponses(content);
       
-      // Add AI response
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+      // 添加所有AI响应
+      const aiMessages: Message[] = responses.map((response, index) => ({
+        id: (Date.now() + index + 1).toString(),
         content: response.message,
         isAi: true,
-        provider: apiProvider
-      };
+        provider: response.provider
+      }));
       
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages(prev => [...prev, ...aiMessages]);
     } catch (error) {
-      console.error('Error getting AI response:', error);
+      console.error('Error getting AI responses:', error);
       toast.error('获取AI回复时出错，请重试');
     } finally {
       setIsLoading(false);
@@ -93,15 +131,6 @@ const Index = () => {
     
     const ratingText = rating === 'like' ? '👍 感谢您的正面反馈' : '👎 感谢您的反馈，我们会努力改进';
     toast.success(ratingText);
-  };
-
-  const handleProviderChange = (provider: ApiProvider) => {
-    setApiProvider(provider);
-    const providerName = 
-      provider === 'mock' ? '模拟API' : 
-      provider === 'openai' ? 'OpenAI' : 
-      provider === 'doubao' ? '豆包AI' : 'Deepseek';
-    toast.success(`已切换到 ${providerName}`);
   };
 
   const handleExportData = () => {
@@ -129,27 +158,23 @@ const Index = () => {
       setMessages([
         {
           id: '1',
-          content: '欢迎使用AI助手！请问有什么可以帮您的？',
+          content: '欢迎使用AI助手！您可以输入问题，同时获得三个AI的回答并进行对比。',
           isAi: true,
           provider: 'mock'
         }
       ]);
+      setQuestions([]);
       toast.success('聊天记录已清除');
     }
   };
 
   return (
     <div className="flex flex-col h-screen bg-ai-neutral-bg">
-      <div className="w-full max-w-4xl mx-auto p-4 flex-1 overflow-hidden flex flex-col">
+      <div className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-hidden flex flex-col">
         <ChatHeader />
         
         <div className="mt-4 flex flex-wrap gap-2 items-center justify-between">
-          <div className="flex-grow">
-            <ApiProviderSelector 
-              selectedProvider={apiProvider} 
-              onProviderChange={handleProviderChange} 
-            />
-          </div>
+          <h2 className="text-xl font-bold">AI模型对比</h2>
           
           <div className="flex gap-2">
             <Button 
@@ -174,21 +199,33 @@ const Index = () => {
           </div>
         </div>
         
+        <div className="text-center mt-2 mb-4 text-gray-600 text-sm">
+          提出任何问题，比较不同AI模型的回答，并为您喜欢的回答点赞。您的反馈有助于改进AI系统！
+        </div>
+        
         <div className="flex-1 overflow-y-auto py-4 px-2">
-          {messages.map((message) => (
-            <ChatMessage 
-              key={message.id}
-              message={message}
+          {/* 显示欢迎消息 */}
+          {messages.length === 1 && messages[0].isAi && (
+            <div className="mb-6 bg-white p-4 rounded-lg text-center">
+              {messages[0].content}
+            </div>
+          )}
+          
+          {/* 显示问题和AI回答 */}
+          {questions.map((question) => (
+            <AiResponseComparison
+              key={question.id}
+              question={question.content}
+              responses={getResponsesForQuestion(question.id)}
               onRateMessage={handleRateMessage}
             />
           ))}
           
           {isLoading && (
-            <div className="flex w-full max-w-4xl mx-auto p-4 rounded-lg mb-4 bg-white">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full mr-4 bg-ai-purple text-white">
-                <MessageSquare size={20} />
-              </div>
+            <div className="flex w-full max-w-6xl mx-auto p-4 justify-center items-center">
+              <MessageSquare size={20} className="text-ai-purple mr-2" />
               <LoadingDots />
+              <div className="ml-2 text-gray-600">正在获取AI回答...</div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -199,6 +236,9 @@ const Index = () => {
             onSendMessage={handleSendMessage} 
             isLoading={isLoading}
           />
+          <div className="text-center mt-2 text-xs text-gray-500">
+            需要帮助？查看我们的 <a href="#" className="text-ai-purple hover:underline">分步教程</a>
+          </div>
         </div>
       </div>
     </div>
