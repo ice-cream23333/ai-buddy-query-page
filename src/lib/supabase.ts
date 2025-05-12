@@ -1,19 +1,10 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Default to empty strings for development to prevent immediate crash
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-url.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
-
-// Create the Supabase client
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Export the Supabase client from the integration
+export const supabase = supabaseClient;
 
 // This function helps determine if Supabase is properly configured
 export function isSupabaseConfigured(): boolean {
-  return (
-    import.meta.env.VITE_SUPABASE_URL &&
-    import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder-url.supabase.co' &&
-    import.meta.env.VITE_SUPABASE_ANON_KEY &&
-    import.meta.env.VITE_SUPABASE_ANON_KEY !== 'placeholder-key'
-  );
+  return true; // Since we're now using the integration client which is always configured
 }
