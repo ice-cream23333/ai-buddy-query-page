@@ -5,16 +5,18 @@ import ChatInput from '@/components/ChatInput';
 import LoadingDots from '@/components/LoadingDots';
 import AiResponseComparison from '@/components/AiResponseComparison';
 import { Message, ApiProvider, UserQuestion } from '@/types/chat';
-import { getAllAiResponses, saveChatsToLocal, loadChatsFromLocal } from '@/services/aiService';
+import { getAllAiResponses, saveChatsToLocal, loadChatsFromLocal, saveRatingToDatabase, syncLocalChatsToDatabase } from '@/services/aiService';
 import { toast } from '@/components/ui/sonner';
 import { FileText, Database, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [questions, setQuestions] = useState<UserQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   // 加载本地存储的聊天记录
   useEffect(() => {
@@ -57,6 +59,13 @@ const Index = () => {
       saveChatsToLocal(messages);
     }
   }, [messages]);
+
+  // 当用户登录时，尝试同步本地数据到数据库
+  useEffect(() => {
+    if (user && messages.length > 0) {
+      syncLocalChatsToDatabase(messages, user.id).catch(console.error);
+    }
+  }, [user, messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -128,6 +137,11 @@ const Index = () => {
           : message
       )
     );
+    
+    // 如果用户已登录，保存评分到数据库
+    if (user) {
+      saveRatingToDatabase(messageId, rating, user.id);
+    }
     
     const ratingText = rating === 'like' ? '👍 感谢您的正面反馈' : '👎 感谢您的反馈，我们会努力改进';
     toast.success(ratingText);
@@ -201,6 +215,11 @@ const Index = () => {
         
         <div className="text-center mt-2 mb-4 text-gray-600 text-sm">
           提出任何问题，比较不同AI模型的回答，并为您喜欢的回答点赞。您的反馈有助于改进AI系统！
+          {!user && (
+            <div className="mt-1 text-blue-600">
+              <a href="/login" className="underline">登录</a> 以保存您的反馈和聊天历史
+            </div>
+          )}
         </div>
         
         <div className="flex-1 overflow-y-auto py-4 px-2">

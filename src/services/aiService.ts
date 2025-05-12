@@ -1,5 +1,6 @@
 
 import { ApiProvider, CHAT_STORAGE_KEY, Message } from '@/types/chat';
+import { supabase } from '@/lib/supabase';
 
 // This is a temporary mock service that will be replaced with the actual AI API integration
 export interface AiResponse {
@@ -140,3 +141,103 @@ export const clearLocalChats = (): void => {
     console.error('清除聊天记录失败:', error);
   }
 };
+
+// 保存用户评价到数据库
+export const saveRatingToDatabase = async (messageId: string, rating: 'like' | 'dislike', userId?: string) => {
+  if (!userId) {
+    console.log('用户未登录，仅保存到本地');
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('ratings')
+      .upsert({
+        user_id: userId,
+        message_id: messageId,
+        rating: rating
+      }, { onConflict: 'user_id, message_id' });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('保存评价到数据库失败:', error);
+  }
+};
+
+// 同步本地聊天历史到数据库
+export const syncLocalChatsToDatabase = async (messages: Message[], userId: string) => {
+  if (!userId) return;
+
+  try {
+    const userQuestions = messages.filter(msg => !msg.isAi);
+    const aiResponses = messages.filter(msg => msg.isAi);
+
+    // 批量插入问题
+    if (userQuestions.length > 0) {
+      const { error } = await supabase
+        .from('questions')
+        .upsert(
+          userQuestions.map(q => ({
+            id: q.id,
+            user_id: userId,
+            content: q.content,
+            created_at: new Date(parseInt(q.id)).toISOString()
+          })),
+          { onConflict: 'id' }
+        );
+      
+      if (error) console.error('同步问题数据失败:', error);
+    }
+
+    // 批量插入AI回答
+    if (aiResponses.length > 0) {
+      const { error } = await supabase
+        .from('ai_responses')
+        .upsert(
+          aiResponses.map(r => ({
+            id: r.id,
+            question_id: findQuestionIdForResponse(r.id, messages),
+            provider: r.provider,
+            content: r.content,
+            created_at: new Date(parseInt(r.id)).toISOString()
+          })),
+          { onConflict: 'id' }
+        );
+      
+      if (error) console.error('同步AI回答数据失败:', error);
+    }
+
+    // 同步评价数据
+    const ratedResponses = aiResponses.filter(r => r.rating);
+    if (ratedResponses.length > 0) {
+      const { error } = await supabase
+        .from('ratings')
+        .upsert(
+          ratedResponses.map(r => ({
+            user_id: userId,
+            message_id: r.id,
+            rating: r.rating
+          })),
+          { onConflict: 'user_id, message_id' }
+        );
+      
+      if (error) console.error('同步评价数据失败:', error);
+    }
+  } catch (error) {
+    console.error('同步数据到数据库失败:', error);
+  }
+};
+
+// 辅助函数：查找响应对应的问题ID
+function findQuestionIdForResponse(responseId: string, messages: Message[]): string {
+  const responseIndex = messages.findIndex(m => m.id === responseId);
+  if (responseIndex <= 0) return '';
+
+  // 向前查找最近的问题
+  for (let i = responseIndex - 1; i >= 0; i--) {
+    if (!messages[i].isAi) {
+      return messages[i].id;
+    }
+  }
+  return '';
+}
