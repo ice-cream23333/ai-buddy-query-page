@@ -10,6 +10,8 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email('请输入有效的电子邮件地址'),
@@ -26,7 +28,7 @@ const registerSchema = z.object({
 });
 
 export default function Login() {
-  const { user, signIn, signUp, loading } = useAuth();
+  const { user, signIn, signUp, loading, supabaseConfigured } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('login');
 
@@ -70,6 +72,40 @@ export default function Login() {
 
   if (user) {
     return <Navigate to="/" />;
+  }
+
+  if (!supabaseConfigured) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-ai-neutral-bg p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Supabase 配置缺失</CardTitle>
+            <CardDescription>需要设置 Supabase 环境变量才能使用身份验证功能</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>配置错误</AlertTitle>
+              <AlertDescription>
+                <p>缺少必要的 Supabase 环境变量。请确保以下环境变量已设置:</p>
+                <ul className="list-disc pl-4 mt-2">
+                  <li>VITE_SUPABASE_URL</li>
+                  <li>VITE_SUPABASE_ANON_KEY</li>
+                </ul>
+                <p className="mt-2">
+                  您需要通过 Lovable 的 Supabase 集成来设置这些变量。点击界面右上角的绿色 Supabase 按钮进行连接。
+                </p>
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => navigate('/')} className="w-full">
+              返回首页
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -126,7 +162,7 @@ export default function Login() {
               </CardContent>
             </Card>
           </TabsContent>
-
+          
           <TabsContent value="register">
             <Card>
               <CardHeader>
