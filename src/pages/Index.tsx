@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import ChatHeader from '@/components/ChatHeader';
 import ChatInput from '@/components/ChatInput';
@@ -7,8 +6,9 @@ import AiResponseComparison from '@/components/AiResponseComparison';
 import { Message, ApiProvider, UserQuestion } from '@/types/chat';
 import { getAllAiResponses, saveChatsToLocal, loadChatsFromLocal, saveRatingToDatabase, syncLocalChatsToDatabase } from '@/services/aiService';
 import { toast } from '@/components/ui/sonner';
-import { FileText, Database, MessageSquare } from 'lucide-react';
+import { FileText, Database, MessageSquare, Sparkles, Download, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
@@ -183,51 +183,77 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-ai-neutral-bg">
-      <div className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="w-full max-w-7xl mx-auto p-6 flex-1 overflow-hidden flex flex-col min-h-screen">
         <ChatHeader />
         
-        <div className="mt-4 flex flex-wrap gap-2 items-center justify-between">
-          <h2 className="text-xl font-bold">AI模型对比</h2>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleExportData}
-              className="flex items-center gap-1"
-            >
-              <FileText size={16} />
-              导出数据集
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleClearHistory}
-              className="flex items-center gap-1 text-red-500 hover:bg-red-50"
-            >
-              <Database size={16} />
-              清除历史
-            </Button>
-          </div>
-        </div>
-        
-        <div className="text-center mt-2 mb-4 text-gray-600 text-sm">
-          提出任何问题，比较不同AI模型的回答，并为您喜欢的回答点赞。您的反馈有助于改进AI系统！
-          {!user && (
-            <div className="mt-1 text-blue-600">
-              <a href="/login" className="underline">登录</a> 以保存您的反馈和聊天历史
+        <Card className="mt-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-4 items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    AI模型对比平台
+                  </h2>
+                  <p className="text-gray-600 text-sm">同时体验多个AI模型，找到最适合的答案</p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleExportData}
+                  className="flex items-center gap-2 bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 text-blue-700"
+                >
+                  <Download size={16} />
+                  导出数据
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleClearHistory}
+                  className="flex items-center gap-2 bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600"
+                >
+                  <Trash2 size={16} />
+                  清除历史
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
         
-        <div className="flex-1 overflow-y-auto py-4 px-2">
+        <Card className="mt-4 mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-200/50 backdrop-blur-sm">
+          <CardContent className="p-4 text-center">
+            <p className="text-gray-700 leading-relaxed">
+              🤖 提出任何问题，比较不同AI模型的回答，并为您喜欢的回答点赞。您的反馈有助于改进AI系统！
+            </p>
+            {!user && (
+              <p className="mt-2 text-blue-600">
+                💡 <a href="/login" className="underline hover:text-blue-800 transition-colors">登录</a> 以保存您的反馈和聊天历史
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        
+        <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
           {/* 显示欢迎消息 */}
           {messages.length === 1 && messages[0].isAi && (
-            <div className="mb-6 bg-white p-4 rounded-lg text-center">
-              {messages[0].content}
-            </div>
+            <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 shadow-md">
+              <CardContent className="p-8 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full text-white">
+                    <MessageSquare className="h-8 w-8" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">开始您的AI对话之旅</h3>
+                <p className="text-gray-600">{messages[0].content}</p>
+              </CardContent>
+            </Card>
           )}
           
           {/* 显示问题和AI回答 */}
@@ -241,22 +267,28 @@ const Index = () => {
           ))}
           
           {isLoading && (
-            <div className="flex w-full max-w-6xl mx-auto p-4 justify-center items-center">
-              <MessageSquare size={20} className="text-ai-purple mr-2" />
-              <LoadingDots />
-              <div className="ml-2 text-gray-600">正在获取AI回答...</div>
-            </div>
+            <Card className="bg-white/60 backdrop-blur-sm border-blue-200">
+              <CardContent className="p-6">
+                <div className="flex justify-center items-center space-x-3">
+                  <div className="p-2 bg-blue-500 rounded-full text-white">
+                    <MessageSquare size={20} />
+                  </div>
+                  <LoadingDots />
+                  <span className="text-gray-700 font-medium">正在获取AI回答...</span>
+                </div>
+              </CardContent>
+            </Card>
           )}
           <div ref={messagesEndRef} />
         </div>
         
-        <div className="sticky bottom-0 bg-ai-neutral-bg pt-2 pb-4">
+        <div className="sticky bottom-0 pt-4 pb-6">
           <ChatInput 
             onSendMessage={handleSendMessage} 
             isLoading={isLoading}
           />
-          <div className="text-center mt-2 text-xs text-gray-500">
-            需要帮助？查看我们的 <a href="#" className="text-ai-purple hover:underline">分步教程</a>
+          <div className="text-center mt-3 text-xs text-gray-500">
+            💡 需要帮助？查看我们的 <a href="#" className="text-blue-500 hover:text-blue-700 underline transition-colors">分步教程</a>
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Message } from '@/types/chat';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Bot, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface AiResponseComparisonProps {
   question: string;
@@ -27,62 +28,93 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
     }
   };
 
+  const getProviderInfo = (provider?: string) => {
+    switch (provider) {
+      case 'openai':
+        return { name: 'OpenAI', color: 'bg-emerald-500', icon: Bot };
+      case 'deepseek':
+        return { name: 'DeepSeek', color: 'bg-purple-500', icon: Sparkles };
+      case 'doubao':
+        return { name: 'Doubao', color: 'bg-orange-500', icon: Bot };
+      default:
+        return { name: 'AI', color: 'bg-gray-500', icon: Bot };
+    }
+  };
+
   const renderResponseCard = (response?: Message) => {
     if (!response) return null;
 
-    const providerName = 
-      response.provider === 'openai' ? 'OpenAI' :
-      response.provider === 'deepseek' ? 'DeepSeek' :
-      response.provider === 'doubao' ? 'Doubao' : 'AI';
+    const providerInfo = getProviderInfo(response.provider);
+    const Icon = providerInfo.icon;
 
     return (
-      <div className="flex-1 p-4 bg-white rounded-md shadow-sm">
-        <h3 className="font-medium text-base mb-2">{providerName}</h3>
-        <div className="whitespace-pre-line text-sm">
-          {response.content}
-        </div>
-        <div className="flex justify-end mt-4 space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleRate(response.id, 'like')}
-            className={cn(
-              "border-gray-200 hover:bg-green-50",
-              response.rating === 'like' && "bg-green-50 border-green-200"
-            )}
-          >
-            <ThumbsUp className={cn(
-              "h-4 w-4", 
-              response.rating === 'like' ? "text-green-500" : "text-gray-500"
-            )} />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleRate(response.id, 'dislike')}
-            className={cn(
-              "border-gray-200 hover:bg-red-50",
-              response.rating === 'dislike' && "bg-red-50 border-red-200"
-            )}
-          >
-            <ThumbsDown className={cn(
-              "h-4 w-4", 
-              response.rating === 'dislike' ? "text-red-500" : "text-gray-500"
-            )} />
-          </Button>
-        </div>
-      </div>
+      <Card className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-3">
+            <div className={cn("p-2 rounded-full text-white", providerInfo.color)}>
+              <Icon className="h-5 w-5" />
+            </div>
+            <h3 className="font-semibold text-lg text-gray-800">{providerInfo.name}</h3>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="whitespace-pre-line text-gray-700 leading-relaxed mb-6 bg-white/60 p-4 rounded-lg backdrop-blur-sm">
+            {response.content}
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleRate(response.id, 'like')}
+              className={cn(
+                "border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200",
+                response.rating === 'like' && "bg-green-50 border-green-300 text-green-700"
+              )}
+            >
+              <ThumbsUp className={cn(
+                "h-4 w-4 mr-1", 
+                response.rating === 'like' ? "text-green-600" : "text-gray-500"
+              )} />
+              <span className="text-sm">好评</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleRate(response.id, 'dislike')}
+              className={cn(
+                "border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200",
+                response.rating === 'dislike' && "bg-red-50 border-red-300 text-red-700"
+              )}
+            >
+              <ThumbsDown className={cn(
+                "h-4 w-4 mr-1", 
+                response.rating === 'dislike' ? "text-red-600" : "text-gray-500"
+              )} />
+              <span className="text-sm">差评</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
   return (
     <div className="w-full mb-8">
-      <div className="mb-4 p-3 bg-white rounded-md border border-gray-200">
-        <div className="text-sm text-gray-500 mb-1">问题：</div>
-        <div className="font-medium">{question}</div>
-      </div>
+      <Card className="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 shadow-md">
+        <CardContent className="p-6">
+          <div className="flex items-start space-x-3">
+            <div className="p-2 bg-indigo-500 rounded-full text-white mt-1">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-indigo-600 font-medium mb-2">提问</div>
+              <div className="text-gray-800 font-medium text-lg leading-relaxed">{question}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {renderResponseCard(openaiResponse)}
         {renderResponseCard(deepseekResponse)}
         {renderResponseCard(doubaoResponse)}
