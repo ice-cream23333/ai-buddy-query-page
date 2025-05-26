@@ -7,7 +7,7 @@ export interface Message {
   rating?: 'like' | 'dislike'; 
 }
 
-export type ApiProvider = 'doubao' | 'openai' | 'deepseek' | 'mock';
+export type ApiProvider = 'openai' | 'claude' | 'gemini' | 'llama' | 'mock';
 
 export interface ApiProviderOption {
   id: ApiProvider;

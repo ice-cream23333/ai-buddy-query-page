@@ -123,7 +123,7 @@ const Index = () => {
       setMessages(prev => [...prev, ...aiMessages]);
     } catch (error) {
       console.error('Error getting AI responses:', error);
-      toast.error('获取AI回复时出错，请重试');
+      toast.error('Failed to get AI responses, please try again');
     } finally {
       setIsLoading(false);
     }
@@ -143,7 +143,7 @@ const Index = () => {
       saveRatingToDatabase(messageId, rating, user.id);
     }
     
-    const ratingText = rating === 'like' ? '👍 感谢您的正面反馈' : '👎 感谢您的反馈，我们会努力改进';
+    const ratingText = rating === 'like' ? '👍 Thank you for your positive feedback' : '👎 Thank you for your feedback, we will work to improve';
     toast.success(ratingText);
   };
 
@@ -160,25 +160,25 @@ const Index = () => {
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
       
-      toast.success('数据集导出成功');
+      toast.success('Data exported successfully');
     } catch (error) {
-      console.error('导出数据失败:', error);
-      toast.error('导出数据失败，请重试');
+      console.error('Export data failed:', error);
+      toast.error('Failed to export data, please try again');
     }
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('确定要清除所有聊天记录吗？此操作不可恢复。')) {
+    if (window.confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
       setMessages([
         {
           id: '1',
-          content: '欢迎使用AI助手！您可以输入问题，同时获得三个AI的回答并进行对比。',
+          content: 'Welcome to AI Assistant! You can ask questions and get responses from multiple AI models for comparison.',
           isAi: true,
           provider: 'mock'
         }
       ]);
       setQuestions([]);
-      toast.success('聊天记录已清除');
+      toast.success('Chat history cleared');
     }
   };
 
@@ -187,7 +187,16 @@ const Index = () => {
       <div className="w-full max-w-7xl mx-auto p-6 flex-1 overflow-hidden flex flex-col min-h-screen">
         <ChatHeader />
         
-        <Card className="mt-6 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+        <div className="text-center mt-6 mb-4">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            Chat with Models
+          </h2>
+          <p className="text-lg text-gray-600">
+            Experience multiple AI models simultaneously and find the best answers
+          </p>
+        </div>
+        
+        <Card className="mt-4 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-4 items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -195,10 +204,10 @@ const Index = () => {
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    AI模型对比平台
-                  </h2>
-                  <p className="text-gray-600 text-sm">同时体验多个AI模型，找到最适合的答案</p>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    AI Model Comparison Platform
+                  </h3>
+                  <p className="text-gray-600 text-sm">Experience multiple AI models and find the most suitable answers</p>
                 </div>
               </div>
               
@@ -210,7 +219,7 @@ const Index = () => {
                   className="flex items-center gap-2 bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 text-blue-700"
                 >
                   <Download size={16} />
-                  导出数据
+                  Export Data
                 </Button>
                 
                 <Button 
@@ -220,7 +229,7 @@ const Index = () => {
                   className="flex items-center gap-2 bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600"
                 >
                   <Trash2 size={16} />
-                  清除历史
+                  Clear History
                 </Button>
               </div>
             </div>
@@ -230,11 +239,11 @@ const Index = () => {
         <Card className="mt-4 mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-200/50 backdrop-blur-sm">
           <CardContent className="p-4 text-center">
             <p className="text-gray-700 leading-relaxed">
-              🤖 提出任何问题，比较不同AI模型的回答，并为您喜欢的回答点赞。您的反馈有助于改进AI系统！
+              🤖 Ask any question, compare responses from different AI models, and like your favorite answers. Your feedback helps improve AI systems!
             </p>
             {!user && (
               <p className="mt-2 text-blue-600">
-                💡 <a href="/login" className="underline hover:text-blue-800 transition-colors">登录</a> 以保存您的反馈和聊天历史
+                💡 <a href="/login" className="underline hover:text-blue-800 transition-colors">Login</a> to save your feedback and chat history
               </p>
             )}
           </CardContent>
@@ -250,7 +259,7 @@ const Index = () => {
                     <MessageSquare className="h-8 w-8" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">开始您的AI对话之旅</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Start Your AI Conversation Journey</h3>
                 <p className="text-gray-600">{messages[0].content}</p>
               </CardContent>
             </Card>
@@ -274,7 +283,7 @@ const Index = () => {
                     <MessageSquare size={20} />
                   </div>
                   <LoadingDots />
-                  <span className="text-gray-700 font-medium">正在获取AI回答...</span>
+                  <span className="text-gray-700 font-medium">Getting AI responses...</span>
                 </div>
               </CardContent>
             </Card>
@@ -288,7 +297,7 @@ const Index = () => {
             isLoading={isLoading}
           />
           <div className="text-center mt-3 text-xs text-gray-500">
-            💡 需要帮助？查看我们的 <a href="#" className="text-blue-500 hover:text-blue-700 underline transition-colors">分步教程</a>
+            💡 Need help? Check our <a href="#" className="text-blue-500 hover:text-blue-700 underline transition-colors">step-by-step tutorial</a>
           </div>
         </div>
       </div>

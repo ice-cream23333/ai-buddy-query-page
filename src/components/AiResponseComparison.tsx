@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Message } from '@/types/chat';
-import { ThumbsUp, ThumbsDown, Bot, Sparkles } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Bot, Sparkles, Brain, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -19,8 +19,9 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
 }) => {
   // 按提供商对回答进行分组
   const openaiResponse = responses.find((r) => r.provider === 'openai');
-  const deepseekResponse = responses.find((r) => r.provider === 'deepseek');
-  const doubaoResponse = responses.find((r) => r.provider === 'doubao');
+  const claudeResponse = responses.find((r) => r.provider === 'claude');
+  const geminiResponse = responses.find((r) => r.provider === 'gemini');
+  const llamaResponse = responses.find((r) => r.provider === 'llama');
 
   const handleRate = (messageId: string, rating: 'like' | 'dislike') => {
     if (onRateMessage) {
@@ -31,18 +32,38 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
   const getProviderInfo = (provider?: string) => {
     switch (provider) {
       case 'openai':
-        return { name: 'OpenAI', color: 'bg-emerald-500', icon: Bot };
-      case 'deepseek':
-        return { name: 'DeepSeek', color: 'bg-purple-500', icon: Sparkles };
-      case 'doubao':
-        return { name: 'Doubao', color: 'bg-orange-500', icon: Bot };
+        return { name: 'OpenAI GPT', color: 'bg-emerald-500', icon: Bot };
+      case 'claude':
+        return { name: 'Claude', color: 'bg-purple-500', icon: Brain };
+      case 'gemini':
+        return { name: 'Gemini', color: 'bg-blue-500', icon: Sparkles };
+      case 'llama':
+        return { name: 'Llama', color: 'bg-orange-500', icon: Zap };
       default:
         return { name: 'AI', color: 'bg-gray-500', icon: Bot };
     }
   };
 
   const renderResponseCard = (response?: Message) => {
-    if (!response) return null;
+    if (!response) {
+      return (
+        <Card className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-lg opacity-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full text-white bg-gray-400">
+                <Bot className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-500">No Response</h3>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="text-gray-400 text-center py-8">
+              Response not available
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
 
     const providerInfo = getProviderInfo(response.provider);
     const Icon = providerInfo.icon;
@@ -75,7 +96,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
                 "h-4 w-4 mr-1", 
                 response.rating === 'like' ? "text-green-600" : "text-gray-500"
               )} />
-              <span className="text-sm">好评</span>
+              <span className="text-sm">Like</span>
             </Button>
             <Button
               variant="outline"
@@ -90,7 +111,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
                 "h-4 w-4 mr-1", 
                 response.rating === 'dislike' ? "text-red-600" : "text-gray-500"
               )} />
-              <span className="text-sm">差评</span>
+              <span className="text-sm">Dislike</span>
             </Button>
           </div>
         </CardContent>
@@ -107,17 +128,18 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex-1">
-              <div className="text-sm text-indigo-600 font-medium mb-2">提问</div>
+              <div className="text-sm text-indigo-600 font-medium mb-2">Question</div>
               <div className="text-gray-800 font-medium text-lg leading-relaxed">{question}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {renderResponseCard(openaiResponse)}
-        {renderResponseCard(deepseekResponse)}
-        {renderResponseCard(doubaoResponse)}
+        {renderResponseCard(claudeResponse)}
+        {renderResponseCard(geminiResponse)}
+        {renderResponseCard(llamaResponse)}
       </div>
     </div>
   );

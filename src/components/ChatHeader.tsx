@@ -3,16 +3,46 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, Home, MessageSquare, Settings } from 'lucide-react';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from '@/lib/utils';
 
 const ChatHeader: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
-    <div className="flex items-center justify-between py-4">
-      <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-gray-800">AI助手</h1>
-        <span className="ml-2 px-2 py-1 text-xs bg-ai-neutral-accent rounded-full text-gray-600">多模型对比</span>
+    <div className="flex items-center justify-between py-4 border-b border-gray-200/50">
+      <div className="flex items-center space-x-6">
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Chat with Models
+          </h1>
+        </div>
+        
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <Link to="/" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link to="/profile" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
+                <Settings className="w-4 h-4 mr-2" />
+                Profile
+              </Link>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
       </div>
 
       <div className="flex items-center gap-2">
@@ -24,12 +54,21 @@ const ChatHeader: React.FC = () => {
                 {user.email?.split('@')[0] || 'Profile'}
               </Link>
             </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={logout}
+              className="flex items-center gap-1"
+            >
+              <LogOut size={16} />
+              Logout
+            </Button>
           </>
         ) : (
           <Button variant="outline" size="sm" asChild>
             <Link to="/login" className="flex items-center gap-1">
               <User size={16} />
-              登录
+              Login
             </Link>
           </Button>
         )}
