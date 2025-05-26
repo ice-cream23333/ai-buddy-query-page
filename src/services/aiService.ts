@@ -1,45 +1,59 @@
-
 import { ApiProvider, Message } from '@/types/chat';
 
 // Mock AI responses for different providers
 const mockResponses: Record<ApiProvider, string[]> = {
+  doubao: [
+    "As Doubao AI, I think this is an excellent question. Based on my training data, I can provide the following insights...",
+    "This question involves multiple aspects. From a technical perspective...",
+    "Let me analyze this question in detail for you across various dimensions...",
+    "According to my knowledge base, there are several key points to consider in this field..."
+  ],
   openai: [
-    "作为 OpenAI 的 GPT 模型，我认为这是一个很好的问题。基于我的训练数据，我可以提供以下见解...",
-    "这个问题涉及多个方面。从技术角度来看...",
-    "让我为您详细分析一下这个问题的各个层面...",
-    "根据我的知识库，这个领域有以下几个关键点需要考虑..."
+    "As OpenAI's GPT model, I think this is a great question. Based on my training data, I can provide the following insights...",
+    "This question involves multiple aspects. From a technical perspective...",
+    "Let me analyze this question in detail for you across various levels...",
+    "According to my knowledge base, there are several key points to consider in this field..."
+  ],
+  deepseek: [
+    "As DeepSeek, I'm happy to help you answer this question. From my perspective...",
+    "This is indeed an interesting question. Let me analyze from different angles...",
+    "I think this question can be considered from the following dimensions...",
+    "Based on my understanding, the core of this question lies in..."
   ],
   claude: [
-    "作为 Claude，我很乐意帮助您解答这个问题。从我的角度来看...",
-    "这确实是一个有趣的问题。让我从不同的角度来分析...",
-    "我认为这个问题可以从以下几个维度来思考...",
-    "基于我的理解，这个问题的核心在于..."
+    "As Claude, I'm happy to help you answer this question. From my perspective...",
+    "This is indeed an interesting question. Let me analyze from different angles...",
+    "I think this question can be considered from the following dimensions...",
+    "Based on my understanding, the core of this question lies in..."
   ],
   gemini: [
-    "作为 Google 的 Gemini 模型，我可以为您提供以下分析...",
-    "这是一个多层次的问题。让我逐步为您解析...",
-    "从我的训练和理解来看，这个问题涉及...",
-    "我建议我们可以从以下几个方面来探讨这个问题..."
+    "As Google's Gemini model, I can provide the following analysis...",
+    "This is a multi-layered question. Let me break it down step by step...",
+    "From my training and understanding, this question involves...",
+    "I suggest we can explore this question from the following aspects..."
   ],
   llama: [
-    "作为 Llama 模型，我基于开源训练数据为您提供以下见解...",
-    "这个问题很有价值。根据我的分析...",
-    "让我基于我的训练数据为您详细解答...",
-    "从开源 AI 的角度，我认为这个问题可以这样理解..."
+    "As Llama model, I provide the following insights based on open-source training data...",
+    "This question is very valuable. According to my analysis...",
+    "Let me answer in detail based on my training data...",
+    "From an open-source AI perspective, I think this question can be understood this way..."
+  ],
+  mock: [
+    "This is a mock response for testing purposes."
   ]
 };
 
-// Add the missing function to get all AI responses
+// Get all AI responses function
 export const getAllAiResponses = async (message: string): Promise<Array<{provider: ApiProvider, message: string}>> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
   
-  const providers: ApiProvider[] = ['openai', 'claude', 'gemini', 'llama'];
+  const providers: ApiProvider[] = ['doubao', 'openai', 'deepseek'];
   
   return providers.map(provider => {
     const responses = mockResponses[provider];
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    const enhancedResponse = `${randomResponse}\n\n针对您的问题"${message}"，我补充以下观点：\n\n${generateRandomInsight()}`;
+    const enhancedResponse = `${randomResponse}\n\nRegarding your question "${message}", I would like to add the following points:\n\n${generateRandomInsight()}`;
     
     return {
       provider,
@@ -56,7 +70,7 @@ export const queryAI = async (message: string, provider: ApiProvider): Promise<{
   const randomResponse = responses[Math.floor(Math.random() * responses.length)];
   
   // Add some variation to the response
-  const enhancedResponse = `${randomResponse}\n\n针对您的问题"${message}"，我补充以下观点：\n\n${generateRandomInsight()}`;
+  const enhancedResponse = `${randomResponse}\n\nRegarding your question "${message}", I would like to add the following points:\n\n${generateRandomInsight()}`;
   
   return {
     id: `${provider}-${Date.now()}-${Math.random()}`,
@@ -68,18 +82,18 @@ export const queryAI = async (message: string, provider: ApiProvider): Promise<{
 
 function generateRandomInsight(): string {
   const insights = [
-    "这个领域正在快速发展，建议您关注最新的研究进展。",
-    "从实践的角度来看，您可能需要考虑实施的可行性。",
-    "这个问题还涉及到伦理和社会影响，值得深入思考。",
-    "建议您可以查阅相关的学术文献获取更多信息。",
-    "从用户体验的角度，这个解决方案需要进一步优化。"
+    "This field is rapidly evolving, I recommend you follow the latest research developments.",
+    "From a practical perspective, you may need to consider the feasibility of implementation.",
+    "This question also involves ethical and social impacts, worth deep consideration.",
+    "I suggest you can consult relevant academic literature for more information.",
+    "From a user experience perspective, this solution needs further optimization."
   ];
   
   return insights[Math.floor(Math.random() * insights.length)];
 }
 
 export const getAvailableProviders = (): ApiProvider[] => {
-  return ['openai', 'claude', 'gemini', 'llama'];
+  return ['doubao', 'openai', 'deepseek'];
 };
 
 // Local storage functions for chat history
@@ -111,12 +125,10 @@ export const clearChatHistory = () => {
 
 // Mock functions for database operations (since we removed Supabase calls)
 export const saveRatingToDatabase = async (messageId: string, rating: 'like' | 'dislike', userId: string) => {
-  // Mock implementation - in a real app this would save to Supabase
   console.log('Rating saved locally:', { messageId, rating, userId });
 };
 
 export const syncLocalChatsToDatabase = async (messages: Message[], userId: string) => {
-  // Mock implementation - in a real app this would sync to Supabase
   console.log('Chats synced locally:', { messageCount: messages.length, userId });
 };
 

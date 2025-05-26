@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const ChatHeader: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="flex items-center justify-between py-4 border-b border-gray-200/50">
@@ -57,7 +57,7 @@ const ChatHeader: React.FC = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={logout}
+              onClick={signOut}
               className="flex items-center gap-1"
             >
               <LogOut size={16} />

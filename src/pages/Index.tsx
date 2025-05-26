@@ -18,13 +18,11 @@ const Index = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  // 加载本地存储的聊天记录
   useEffect(() => {
     const savedMessages = loadChatsFromLocal();
     if (savedMessages && savedMessages.length > 0) {
       setMessages(savedMessages);
       
-      // 从保存的消息中提取问题
       const extractedQuestions: UserQuestion[] = [];
       const seenQuestions = new Set();
       
@@ -41,11 +39,10 @@ const Index = () => {
       
       setQuestions(extractedQuestions);
     } else {
-      // 如果没有本地存储的聊天记录，设置初始欢迎消息
       setMessages([
         {
           id: '1',
-          content: '欢迎使用AI助手！您可以输入问题，同时获得三个AI的回答并进行对比。',
+          content: 'Welcome to AI Assistant! You can ask questions and get responses from multiple AI models for comparison.',
           isAi: true,
           provider: 'mock'
         }
@@ -53,14 +50,12 @@ const Index = () => {
     }
   }, []);
 
-  // 当消息更新时，保存到本地存储
   useEffect(() => {
     if (messages.length > 0) {
       saveChatsToLocal(messages);
     }
   }, [messages]);
 
-  // 当用户登录时，尝试同步本地数据到数据库
   useEffect(() => {
     if (user && messages.length > 0) {
       syncLocalChatsToDatabase(messages, user.id).catch(console.error);
@@ -75,7 +70,6 @@ const Index = () => {
     scrollToBottom();
   }, [messages, questions]);
 
-  // 获取与问题相关的所有AI响应
   const getResponsesForQuestion = (questionId: string) => {
     return messages.filter(msg => 
       msg.isAi && 
@@ -91,7 +85,6 @@ const Index = () => {
   const handleSendMessage = async (content: string) => {
     const questionId = Date.now().toString();
     
-    // 添加用户问题
     const userMessage: Message = {
       id: questionId,
       content,
@@ -109,10 +102,8 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      // 获取所有AI提供商的响应
       const responses = await getAllAiResponses(content);
       
-      // 添加所有AI响应
       const aiMessages: Message[] = responses.map((response, index) => ({
         id: (Date.now() + index + 1).toString(),
         content: response.message,
@@ -138,7 +129,6 @@ const Index = () => {
       )
     );
     
-    // 如果用户已登录，保存评分到数据库
     if (user) {
       saveRatingToDatabase(messageId, rating, user.id);
     }
@@ -149,11 +139,9 @@ const Index = () => {
 
   const handleExportData = () => {
     try {
-      // 创建一个包含对话数据的JSON文件
       const dataStr = JSON.stringify(messages, null, 2);
       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
       
-      // 创建下载链接
       const exportFileDefaultName = `ai-chat-data-${new Date().toISOString().slice(0, 10)}.json`;
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
@@ -186,15 +174,6 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="w-full max-w-7xl mx-auto p-6 flex-1 overflow-hidden flex flex-col min-h-screen">
         <ChatHeader />
-        
-        <div className="text-center mt-6 mb-4">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Chat with Models
-          </h2>
-          <p className="text-lg text-gray-600">
-            Experience multiple AI models simultaneously and find the best answers
-          </p>
-        </div>
         
         <Card className="mt-4 bg-white/80 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6">
@@ -250,7 +229,6 @@ const Index = () => {
         </Card>
         
         <div className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
-          {/* 显示欢迎消息 */}
           {messages.length === 1 && messages[0].isAi && (
             <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 shadow-md">
               <CardContent className="p-8 text-center">
@@ -265,7 +243,6 @@ const Index = () => {
             </Card>
           )}
           
-          {/* 显示问题和AI回答 */}
           {questions.map((question) => (
             <AiResponseComparison
               key={question.id}
@@ -296,9 +273,6 @@ const Index = () => {
             onSendMessage={handleSendMessage} 
             isLoading={isLoading}
           />
-          <div className="text-center mt-3 text-xs text-gray-500">
-            💡 Need help? Check our <a href="#" className="text-blue-500 hover:text-blue-700 underline transition-colors">step-by-step tutorial</a>
-          </div>
         </div>
       </div>
     </div>

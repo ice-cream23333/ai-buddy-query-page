@@ -9,10 +9,9 @@ interface ApiProviderSelectorProps {
 }
 
 const providers: ApiProviderOption[] = [
-  { id: 'mock', name: '模拟API' },
-  { id: 'openai', name: 'OpenAI' },
-  { id: 'deepseek', name: 'Deepseek' },
-  { id: 'doubao', name: '豆包AI' },
+  { id: 'doubao', name: 'Doubao' },
+  { id: 'openai', name: 'OpenAI GPT' },
+  { id: 'deepseek', name: 'DeepSeek' },
 ];
 
 const ApiProviderSelector: React.FC<ApiProviderSelectorProps> = ({
@@ -26,7 +25,7 @@ const ApiProviderSelector: React.FC<ApiProviderSelectorProps> = ({
         onValueChange={(value) => onProviderChange(value as ApiProvider)}
       >
         <SelectTrigger className="w-full bg-white border-ai-purple">
-          <SelectValue placeholder="选择AI提供者" />
+          <SelectValue placeholder="Select AI Provider" />
         </SelectTrigger>
         <SelectContent>
           {providers.map((provider) => (

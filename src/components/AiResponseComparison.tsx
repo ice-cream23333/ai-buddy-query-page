@@ -17,11 +17,10 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
   responses,
   onRateMessage,
 }) => {
-  // 按提供商对回答进行分组
+  // Group responses by provider
+  const doubaoResponse = responses.find((r) => r.provider === 'doubao');
   const openaiResponse = responses.find((r) => r.provider === 'openai');
-  const claudeResponse = responses.find((r) => r.provider === 'claude');
-  const geminiResponse = responses.find((r) => r.provider === 'gemini');
-  const llamaResponse = responses.find((r) => r.provider === 'llama');
+  const deepseekResponse = responses.find((r) => r.provider === 'deepseek');
 
   const handleRate = (messageId: string, rating: 'like' | 'dislike') => {
     if (onRateMessage) {
@@ -31,14 +30,12 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
 
   const getProviderInfo = (provider?: string) => {
     switch (provider) {
+      case 'doubao':
+        return { name: 'Doubao', color: 'bg-red-500', icon: Brain };
       case 'openai':
         return { name: 'OpenAI GPT', color: 'bg-emerald-500', icon: Bot };
-      case 'claude':
-        return { name: 'Claude', color: 'bg-purple-500', icon: Brain };
-      case 'gemini':
-        return { name: 'Gemini', color: 'bg-blue-500', icon: Sparkles };
-      case 'llama':
-        return { name: 'Llama', color: 'bg-orange-500', icon: Zap };
+      case 'deepseek':
+        return { name: 'DeepSeek', color: 'bg-blue-500', icon: Sparkles };
       default:
         return { name: 'AI', color: 'bg-gray-500', icon: Bot };
     }
@@ -135,11 +132,10 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {renderResponseCard(doubaoResponse)}
         {renderResponseCard(openaiResponse)}
-        {renderResponseCard(claudeResponse)}
-        {renderResponseCard(geminiResponse)}
-        {renderResponseCard(llamaResponse)}
+        {renderResponseCard(deepseekResponse)}
       </div>
     </div>
   );

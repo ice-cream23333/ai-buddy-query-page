@@ -7,7 +7,7 @@ export interface Message {
   rating?: 'like' | 'dislike'; 
 }
 
-export type ApiProvider = 'openai' | 'claude' | 'gemini' | 'llama' | 'mock';
+export type ApiProvider = 'openai' | 'claude' | 'gemini' | 'llama' | 'doubao' | 'deepseek' | 'mock';
 
 export interface ApiProviderOption {
   id: ApiProvider;
@@ -17,14 +17,14 @@ export interface ApiProviderOption {
 // Local storage key for saving chat data
 export const CHAT_STORAGE_KEY = 'ai-chat-history';
 
-// 新增类型：用户问题
+// User question type
 export interface UserQuestion {
   id: string;
   content: string;
   timestamp: number;
 }
 
-// 新增类型：AI回答组
+// AI response group type
 export interface AiResponseGroup {
   questionId: string;
   responses: Message[];
