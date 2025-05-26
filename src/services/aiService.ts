@@ -1,243 +1,117 @@
 
-import { ApiProvider, CHAT_STORAGE_KEY, Message } from '@/types/chat';
-import { supabase } from '@/lib/supabase';
+import { ApiProvider, ChatMessage, AiResponse } from '@/types/chat';
 
-// This is a temporary mock service that will be replaced with the actual AI API integration
-export interface AiResponse {
-  message: string;
-  provider: ApiProvider;
+// Mock AI responses for different providers
+const mockResponses: Record<ApiProvider, string[]> = {
+  openai: [
+    "作为 OpenAI 的 GPT 模型，我认为这是一个很好的问题。基于我的训练数据，我可以提供以下见解...",
+    "这个问题涉及多个方面。从技术角度来看...",
+    "让我为您详细分析一下这个问题的各个层面...",
+    "根据我的知识库，这个领域有以下几个关键点需要考虑..."
+  ],
+  claude: [
+    "作为 Claude，我很乐意帮助您解答这个问题。从我的角度来看...",
+    "这确实是一个有趣的问题。让我从不同的角度来分析...",
+    "我认为这个问题可以从以下几个维度来思考...",
+    "基于我的理解，这个问题的核心在于..."
+  ],
+  gemini: [
+    "作为 Google 的 Gemini 模型，我可以为您提供以下分析...",
+    "这是一个多层次的问题。让我逐步为您解析...",
+    "从我的训练和理解来看，这个问题涉及...",
+    "我建议我们可以从以下几个方面来探讨这个问题..."
+  ],
+  llama: [
+    "作为 Llama 模型，我基于开源训练数据为您提供以下见解...",
+    "这个问题很有价值。根据我的分析...",
+    "让我基于我的训练数据为您详细解答...",
+    "从开源 AI 的角度，我认为这个问题可以这样理解..."
+  ]
+};
+
+export const queryAI = async (message: string, provider: ApiProvider): Promise<AiResponse> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  
+  const responses = mockResponses[provider];
+  const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+  
+  // Add some variation to the response
+  const enhancedResponse = `${randomResponse}\n\n针对您的问题"${message}"，我补充以下观点：\n\n${generateRandomInsight()}`;
+  
+  return {
+    id: `${provider}-${Date.now()}-${Math.random()}`,
+    provider,
+    content: enhancedResponse,
+    timestamp: new Date().toISOString()
+  };
+};
+
+function generateRandomInsight(): string {
+  const insights = [
+    "这个领域正在快速发展，建议您关注最新的研究进展。",
+    "从实践的角度来看，您可能需要考虑实施的可行性。",
+    "这个问题还涉及到伦理和社会影响，值得深入思考。",
+    "建议您可以查阅相关的学术文献获取更多信息。",
+    "从用户体验的角度，这个解决方案需要进一步优化。"
+  ];
+  
+  return insights[Math.floor(Math.random() * insights.length)];
 }
 
-export const getAiResponse = async (message: string, provider: ApiProvider = 'mock'): Promise<AiResponse> => {
-  console.log(`Using provider: ${provider}`);
-  
-  // 在实际场景中，这里会根据不同的provider调用不同的API
-  // For demonstration purposes, we're still using mock responses
-  
-  // Simulate network delay with different times for each provider
-  await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1500));
-  
-  if (provider === 'openai') {
-    return { message: getMockOpenAIResponse(message), provider };
-  } else if (provider === 'doubao') {
-    return { message: getMockDoubaoResponse(message), provider };
-  } else if (provider === 'deepseek') {
-    return { message: getMockDeepseekResponse(message), provider };
-  } else {
-    // Default mock provider
-    return { message: getMockResponse(message), provider };
+export const getAvailableProviders = (): ApiProvider[] => {
+  return ['openai', 'claude', 'gemini', 'llama'];
+};
+
+// Local storage functions for chat history
+export const saveChatHistory = (messages: ChatMessage[]) => {
+  try {
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+  } catch (error) {
+    console.error('Failed to save chat history:', error);
   }
 };
 
-// 同时调用所有AI提供商
-export const getAllAiResponses = async (message: string): Promise<AiResponse[]> => {
-  const providers: ApiProvider[] = ['doubao', 'openai', 'deepseek'];
-  
+export const loadChatHistory = (): ChatMessage[] => {
   try {
-    // 并行调用所有API
-    const responses = await Promise.all(
-      providers.map(provider => getAiResponse(message, provider))
-    );
-    return responses;
+    const saved = localStorage.getItem('chatHistory');
+    return saved ? JSON.parse(saved) : [];
   } catch (error) {
-    console.error('Error getting AI responses:', error);
-    throw error;
-  }
-};
-
-// 为每个提供商创建不同的回复风格
-function getMockOpenAIResponse(message: string): string {
-  if (message.toLowerCase().includes('stress') || message.includes('压力')) {
-    return `To manage exam stress effectively:
-
-1. Preparation strategies:
-   • Break down study material into manageable daily goals
-   • Start early to avoid last-minute
-   • Create concise summary notes for quick reviews
-
-2. Physical well-being:
-   • Prioritize 7-8 hours of sleep
-   • Choose brain-boosting foods (nuts, fruits, protein)
-   • Exercise for at least 20 minutes daily`;
-  }
-  
-  return getMockResponse(message);
-}
-
-function getMockDeepseekResponse(message: string): string {
-  if (message.toLowerCase().includes('stress') || message.includes('压力')) {
-    return `To manage exam stress effectively, try these approaches:
-
-1. Create a realistic study schedule
-2. Practice the Pomodoro technique
-3. Mindfulness for 5-10 minutes daily
-4. Establish regular sleep (7-8 hours) and nutrition
-5. Use the Feynman technique: 25 min of focused study followed by 5-minute breaks
-
-Remember to focus on learning rather than perfection, and view the exam as an opportunity to demonstrate what you've learned.`;
-  }
-  
-  return getMockResponse(message);
-}
-
-function getMockDoubaoResponse(message: string): string {
-  if (message.toLowerCase().includes('stress') || message.includes('压力')) {
-    return `Managing exam stress is about balance. Here's what helps:
-
-First, organize your materials and create a structured study plan by breaking large topics into smaller chunks when they seem overwhelming.
-
-Second, take care of your physical health - proper sleep, healthy meals, and regular exercise significantly impact your mental state.
-
-For immediate stress relief, try the 4-7-8 breathing technique (inhale for 4, hold for 7, exhale for 8). This activates your parasympathetic nervous system.`;
-  }
-  
-  return getMockResponse(message);
-}
-
-// 通用回复生成
-function getMockResponse(message: string): string {
-  // 基本回复逻辑
-  if (message.includes('你好') || message.includes('嗨') || message.includes('hi')) {
-    return '你好！很高兴为您服务。有什么我能帮助您的吗？';
-  }
-  
-  if (message.includes('天气')) {
-    return '抱歉，我目前无法查询实时天气。这个功能需要连接到天气API。请问您有其他问题吗？';
-  }
-  
-  if (message.includes('介绍') || message.includes('是谁')) {
-    return '我是一个AI助手，可以回答您的问题、提供信息以及助您解决各种问题。虽然我的能力有限，但我会尽力为您提供帮助！';
-  }
-
-  // Default response
-  return '感谢您的提问。目前我是一个简单的模拟AI，还无法处理复杂的问题。将来会连接到真实的AI API来为您提供更准确的回答。';
-}
-
-// 保存聊天记录到本地存储
-export const saveChatsToLocal = (messages: Message[]): void => {
-  try {
-    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
-  } catch (error) {
-    console.error('保存聊天记录失败:', error);
-  }
-};
-
-// 从本地存储加载聊天记录
-export const loadChatsFromLocal = (): Message[] => {
-  try {
-    const savedChats = localStorage.getItem(CHAT_STORAGE_KEY);
-    return savedChats ? JSON.parse(savedChats) : [];
-  } catch (error) {
-    console.error('加载聊天记录失败:', error);
+    console.error('Failed to load chat history:', error);
     return [];
   }
 };
 
-// 清除本地存储的聊天记录
-export const clearLocalChats = (): void => {
+export const clearChatHistory = () => {
   try {
-    localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem('chatHistory');
   } catch (error) {
-    console.error('清除聊天记录失败:', error);
+    console.error('Failed to clear chat history:', error);
   }
 };
 
-// 保存用户评价到数据库
-export const saveRatingToDatabase = async (messageId: string, rating: 'like' | 'dislike', userId?: string) => {
-  if (!userId) {
-    console.log('用户未登录，仅保存到本地');
-    return;
-  }
-
+// Local storage functions for ratings
+export const saveRating = (messageId: string, rating: 'like' | 'dislike') => {
   try {
-    const { error } = await supabase
-      .from('ratings')
-      .upsert({
-        user_id: userId,
-        message_id: messageId,
-        rating: rating
-      }, { onConflict: 'user_id, message_id' });
-
-    if (error) throw error;
+    const ratings = getRatings();
+    ratings[messageId] = rating;
+    localStorage.setItem('messageRatings', JSON.stringify(ratings));
   } catch (error) {
-    console.error('保存评价到数据库失败:', error);
+    console.error('Failed to save rating:', error);
   }
 };
 
-// 同步本地聊天历史到数据库
-export const syncLocalChatsToDatabase = async (messages: Message[], userId: string) => {
-  if (!userId) return;
-
+export const getRatings = (): Record<string, 'like' | 'dislike'> => {
   try {
-    const userQuestions = messages.filter(msg => !msg.isAi);
-    const aiResponses = messages.filter(msg => msg.isAi);
-
-    // 批量插入问题
-    if (userQuestions.length > 0) {
-      const { error } = await supabase
-        .from('questions')
-        .upsert(
-          userQuestions.map(q => ({
-            id: q.id,
-            user_id: userId,
-            content: q.content,
-            created_at: new Date(parseInt(q.id)).toISOString()
-          })),
-          { onConflict: 'id' }
-        );
-      
-      if (error) console.error('同步问题数据失败:', error);
-    }
-
-    // 批量插入AI回答
-    if (aiResponses.length > 0) {
-      const { error } = await supabase
-        .from('ai_responses')
-        .upsert(
-          aiResponses.map(r => ({
-            id: r.id,
-            question_id: findQuestionIdForResponse(r.id, messages),
-            provider: r.provider,
-            content: r.content,
-            created_at: new Date(parseInt(r.id)).toISOString()
-          })),
-          { onConflict: 'id' }
-        );
-      
-      if (error) console.error('同步AI回答数据失败:', error);
-    }
-
-    // 同步评价数据
-    const ratedResponses = aiResponses.filter(r => r.rating);
-    if (ratedResponses.length > 0) {
-      const { error } = await supabase
-        .from('ratings')
-        .upsert(
-          ratedResponses.map(r => ({
-            user_id: userId,
-            message_id: r.id,
-            rating: r.rating
-          })),
-          { onConflict: 'user_id, message_id' }
-        );
-      
-      if (error) console.error('同步评价数据失败:', error);
-    }
+    const saved = localStorage.getItem('messageRatings');
+    return saved ? JSON.parse(saved) : {};
   } catch (error) {
-    console.error('同步数据到数据库失败:', error);
+    console.error('Failed to get ratings:', error);
+    return {};
   }
 };
 
-// 辅助函数：查找响应对应的问题ID
-function findQuestionIdForResponse(responseId: string, messages: Message[]): string {
-  const responseIndex = messages.findIndex(m => m.id === responseId);
-  if (responseIndex <= 0) return '';
-
-  // 向前查找最近的问题
-  for (let i = responseIndex - 1; i >= 0; i--) {
-    if (!messages[i].isAi) {
-      return messages[i].id;
-    }
-  }
-  return '';
-}
+export const getRating = (messageId: string): 'like' | 'dislike' | null => {
+  const ratings = getRatings();
+  return ratings[messageId] || null;
+};

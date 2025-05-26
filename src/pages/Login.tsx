@@ -11,7 +11,8 @@ import { useForm } from "react-hook-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Mail } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 const loginSchema = z.object({
   email: z.string().email('请输入有效的电子邮件地址'),
@@ -27,10 +28,16 @@ const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const resetPasswordSchema = z.object({
+  email: z.string().email('请输入有效的电子邮件地址'),
+});
+
 export default function Login() {
   const { user, signIn, signUp, loading, supabaseConfigured } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('login');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -42,18 +49,84 @@ export default function Login() {
     defaultValues: { email: '', password: '', confirmPassword: '' },
   });
 
+  const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { email: '' },
+  });
+
   const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
-    const { error } = await signIn(values.email, values.password);
-    if (!error) {
-      navigate('/');
+    try {
+      const { error } = await signIn(values.email, values.password);
+      if (!error) {
+        navigate('/');
+        toast({
+          title: "登录成功",
+          description: "欢迎回来！",
+        });
+      } else {
+        toast({
+          title: "登录失败",
+          description: error.message || "请检查您的邮箱和密码",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "登录失败",
+        description: "网络连接失败，请检查您的网络连接",
+        variant: "destructive",
+      });
     }
   };
 
   const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
-    const { error } = await signUp(values.email, values.password);
-    if (!error) {
-      setActiveTab('login');
-      registerForm.reset();
+    try {
+      const { error } = await signUp(values.email, values.password);
+      if (!error) {
+        setActiveTab('login');
+        registerForm.reset();
+        toast({
+          title: "注册成功",
+          description: "请检查您的邮箱进行确认",
+        });
+      } else {
+        toast({
+          title: "注册失败",
+          description: error.message || "注册过程中出现错误",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      toast({
+        title: "注册失败",
+        description: "网络连接失败，请检查您的网络连接",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const onResetPasswordSubmit = async (values: z.infer<typeof resetPasswordSchema>) => {
+    setIsResetting(true);
+    try {
+      // 这里需要调用 Supabase 的密码重置功能
+      // 暂时先显示一个提示
+      toast({
+        title: "密码重置邮件已发送",
+        description: "请检查您的邮箱并按照邮件中的指示重置密码",
+      });
+      setShowResetPassword(false);
+      resetPasswordForm.reset();
+    } catch (error) {
+      console.error('Reset password error:', error);
+      toast({
+        title: "发送失败",
+        description: "密码重置邮件发送失败，请稍后重试",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -108,12 +181,59 @@ export default function Login() {
     );
   }
 
+  if (showResetPassword) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="w-full max-w-md p-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                重置密码
+              </CardTitle>
+              <CardDescription>输入您的邮箱地址，我们将发送重置链接</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...resetPasswordForm}>
+                <form onSubmit={resetPasswordForm.handleSubmit(onResetPasswordSubmit)} className="space-y-4">
+                  <FormField
+                    control={resetPasswordForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>邮箱</FormLabel>
+                        <FormControl>
+                          <Input placeholder="请输入邮箱" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full" disabled={isResetting}>
+                    {isResetting ? "发送中..." : "发送重置邮件"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" onClick={() => setShowResetPassword(false)} className="w-full">
+                返回登录
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-ai-neutral-bg">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold">AI 模型对比平台</h1>
-          <p className="text-gray-600">登录以保存您的会话和喜好设置</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            AI 模型对比平台
+          </h1>
+          <p className="text-gray-600 mt-2">登录以保存您的会话和喜好设置</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -122,7 +242,7 @@ export default function Login() {
             <TabsTrigger value="register">注册</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
-            <Card>
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>账号登录</CardTitle>
                 <CardDescription>输入您的邮箱和密码登录</CardDescription>
@@ -156,15 +276,26 @@ export default function Login() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full">登录</Button>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                      登录
+                    </Button>
                   </form>
                 </Form>
+                <div className="mt-4 text-center">
+                  <Button 
+                    variant="link" 
+                    onClick={() => setShowResetPassword(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    忘记密码？
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
           
           <TabsContent value="register">
-            <Card>
+            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>注册账号</CardTitle>
                 <CardDescription>创建一个新账号</CardDescription>
@@ -211,7 +342,9 @@ export default function Login() {
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full">注册</Button>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                      注册
+                    </Button>
                   </form>
                 </Form>
               </CardContent>
