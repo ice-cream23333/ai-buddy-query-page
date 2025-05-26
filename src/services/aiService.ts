@@ -1,5 +1,5 @@
 
-import { ApiProvider, ChatMessage, AiResponse } from '@/types/chat';
+import { ApiProvider, Message } from '@/types/chat';
 
 // Mock AI responses for different providers
 const mockResponses: Record<ApiProvider, string[]> = {
@@ -29,7 +29,26 @@ const mockResponses: Record<ApiProvider, string[]> = {
   ]
 };
 
-export const queryAI = async (message: string, provider: ApiProvider): Promise<AiResponse> => {
+// Add the missing function to get all AI responses
+export const getAllAiResponses = async (message: string): Promise<Array<{provider: ApiProvider, message: string}>> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  
+  const providers: ApiProvider[] = ['openai', 'claude', 'gemini', 'llama'];
+  
+  return providers.map(provider => {
+    const responses = mockResponses[provider];
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    const enhancedResponse = `${randomResponse}\n\n针对您的问题"${message}"，我补充以下观点：\n\n${generateRandomInsight()}`;
+    
+    return {
+      provider,
+      message: enhancedResponse
+    };
+  });
+};
+
+export const queryAI = async (message: string, provider: ApiProvider): Promise<{id: string, provider: ApiProvider, content: string, timestamp: string}> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
   
@@ -64,7 +83,7 @@ export const getAvailableProviders = (): ApiProvider[] => {
 };
 
 // Local storage functions for chat history
-export const saveChatHistory = (messages: ChatMessage[]) => {
+export const saveChatsToLocal = (messages: Message[]) => {
   try {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   } catch (error) {
@@ -72,7 +91,7 @@ export const saveChatHistory = (messages: ChatMessage[]) => {
   }
 };
 
-export const loadChatHistory = (): ChatMessage[] => {
+export const loadChatsFromLocal = (): Message[] => {
   try {
     const saved = localStorage.getItem('chatHistory');
     return saved ? JSON.parse(saved) : [];
@@ -88,6 +107,17 @@ export const clearChatHistory = () => {
   } catch (error) {
     console.error('Failed to clear chat history:', error);
   }
+};
+
+// Mock functions for database operations (since we removed Supabase calls)
+export const saveRatingToDatabase = async (messageId: string, rating: 'like' | 'dislike', userId: string) => {
+  // Mock implementation - in a real app this would save to Supabase
+  console.log('Rating saved locally:', { messageId, rating, userId });
+};
+
+export const syncLocalChatsToDatabase = async (messages: Message[], userId: string) => {
+  // Mock implementation - in a real app this would sync to Supabase
+  console.log('Chats synced locally:', { messageCount: messages.length, userId });
 };
 
 // Local storage functions for ratings
