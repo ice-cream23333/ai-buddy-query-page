@@ -17,7 +17,7 @@ export default function Profile() {
           <div className="flex items-center justify-center">
             <div className="w-16 h-16 border-4 border-t-blue-500 border-b-blue-700 rounded-full animate-spin"></div>
           </div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">加载中...</p>
         </div>
       </div>
     );
@@ -29,7 +29,7 @@ export default function Profile() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: 'long', 
       day: 'numeric'
@@ -43,13 +43,13 @@ export default function Profile() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 30) {
-      return `${diffDays} days`;
+      return `${diffDays} 天`;
     } else if (diffDays < 365) {
       const months = Math.floor(diffDays / 30);
-      return `${months} month${months > 1 ? 's' : ''}`;
+      return `${months} 个月`;
     } else {
       const years = Math.floor(diffDays / 365);
-      return `${years} year${years > 1 ? 's' : ''}`;
+      return `${years} 年`;
     }
   };
   
@@ -60,7 +60,7 @@ export default function Profile() {
         
         <div className="mt-8">
           <h1 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            User Profile
+            个人资料
           </h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -69,14 +69,14 @@ export default function Profile() {
               <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3">
                   <User className="h-6 w-6" />
-                  Account Information
+                  账户信息
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 pt-6">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <Mail className="h-5 w-5 text-blue-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Email Address</p>
+                    <p className="text-sm text-gray-500 font-medium">邮箱地址</p>
                     <p className="font-semibold text-gray-800">{user.email}</p>
                   </div>
                 </div>
@@ -84,7 +84,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <Hash className="h-5 w-5 text-green-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">User ID</p>
+                    <p className="text-sm text-gray-500 font-medium">用户ID</p>
                     <p className="font-mono text-sm text-gray-800 break-all">{user.id}</p>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export default function Profile() {
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <Calendar className="h-5 w-5 text-purple-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Registration Date</p>
+                    <p className="text-sm text-gray-500 font-medium">注册时间</p>
                     <p className="font-semibold text-gray-800">
                       {formatDate(user.created_at ?? new Date().toISOString())}
                     </p>
@@ -106,14 +106,14 @@ export default function Profile() {
               <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3">
                   <Shield className="h-6 w-6" />
-                  Account Statistics
+                  账户统计
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 pt-6">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <Clock className="h-5 w-5 text-indigo-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Account Age</p>
+                    <p className="text-sm text-gray-500 font-medium">账户年龄</p>
                     <p className="font-semibold text-gray-800">
                       {getAccountAge(user.created_at ?? new Date().toISOString())}
                     </p>
@@ -123,16 +123,16 @@ export default function Profile() {
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <Shield className="h-5 w-5 text-emerald-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Account Status</p>
-                    <p className="font-semibold text-emerald-600">Active</p>
+                    <p className="text-sm text-gray-500 font-medium">账户状态</p>
+                    <p className="font-semibold text-emerald-600">正常</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <User className="h-5 w-5 text-orange-500" />
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">User Type</p>
-                    <p className="font-semibold text-gray-800">Standard User</p>
+                    <p className="text-sm text-gray-500 font-medium">用户类型</p>
+                    <p className="font-semibold text-gray-800">标准用户</p>
                   </div>
                 </div>
               </CardContent>
@@ -149,7 +149,7 @@ export default function Profile() {
                   onClick={() => signOut()}
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  退出登录
                 </Button>
               </CardFooter>
             </Card>

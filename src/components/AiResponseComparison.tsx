@@ -31,7 +31,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
   const getProviderInfo = (provider?: string) => {
     switch (provider) {
       case 'doubao':
-        return { name: 'Doubao', color: 'bg-red-500', icon: Brain };
+        return { name: '豆包', color: 'bg-red-500', icon: Brain };
       case 'openai':
         return { name: 'OpenAI GPT', color: 'bg-emerald-500', icon: Bot };
       case 'deepseek':
@@ -50,12 +50,12 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
               <div className="p-2 rounded-full text-white bg-gray-400">
                 <Bot className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-lg text-gray-500">No Response</h3>
+              <h3 className="font-semibold text-lg text-gray-500">暂无回复</h3>
             </div>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="text-gray-400 text-center py-8">
-              Response not available
+              回复不可用
             </div>
           </CardContent>
         </Card>
@@ -93,7 +93,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
                 "h-4 w-4 mr-1", 
                 response.rating === 'like' ? "text-green-600" : "text-gray-500"
               )} />
-              <span className="text-sm">Like</span>
+              <span className="text-sm">赞</span>
             </Button>
             <Button
               variant="outline"
@@ -108,7 +108,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
                 "h-4 w-4 mr-1", 
                 response.rating === 'dislike' ? "text-red-600" : "text-gray-500"
               )} />
-              <span className="text-sm">Dislike</span>
+              <span className="text-sm">踩</span>
             </Button>
           </div>
         </CardContent>
@@ -125,7 +125,7 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex-1">
-              <div className="text-sm text-indigo-600 font-medium mb-2">Question</div>
+              <div className="text-sm text-indigo-600 font-medium mb-2">问题</div>
               <div className="text-gray-800 font-medium text-lg leading-relaxed">{question}</div>
             </div>
           </div>

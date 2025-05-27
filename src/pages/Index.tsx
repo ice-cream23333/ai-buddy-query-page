@@ -114,7 +114,7 @@ const Index = () => {
       setMessages(prev => [...prev, ...aiMessages]);
     } catch (error) {
       console.error('Error getting AI responses:', error);
-      toast.error('Failed to get AI responses, please try again');
+      toast.error('获取AI回复失败，请重试');
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +133,7 @@ const Index = () => {
       saveRatingToDatabase(messageId, rating, user.id);
     }
     
-    const ratingText = rating === 'like' ? '👍 Thank you for your positive feedback' : '👎 Thank you for your feedback, we will work to improve';
+    const ratingText = rating === 'like' ? '👍 感谢您的积极反馈' : '👎 感谢您的反馈，我们会努力改进';
     toast.success(ratingText);
   };
 
@@ -142,31 +142,31 @@ const Index = () => {
       const dataStr = JSON.stringify(messages, null, 2);
       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
       
-      const exportFileDefaultName = `ai-chat-data-${new Date().toISOString().slice(0, 10)}.json`;
+      const exportFileDefaultName = `ai-聊天记录-${new Date().toISOString().slice(0, 10)}.json`;
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', exportFileDefaultName);
       linkElement.click();
       
-      toast.success('Data exported successfully');
+      toast.success('数据导出成功');
     } catch (error) {
       console.error('Export data failed:', error);
-      toast.error('Failed to export data, please try again');
+      toast.error('导出数据失败，请重试');
     }
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Are you sure you want to clear all chat history? This action cannot be undone.')) {
+    if (window.confirm('确定要清空所有聊天记录吗？此操作无法撤销。')) {
       setMessages([
         {
           id: '1',
-          content: 'Welcome to AI Assistant! You can ask questions and get responses from multiple AI models for comparison.',
+          content: '欢迎使用AI助手！您可以提问并获得多个AI模型的回答对比。',
           isAi: true,
           provider: 'mock'
         }
       ]);
       setQuestions([]);
-      toast.success('Chat history cleared');
+      toast.success('聊天记录已清空');
     }
   };
 
@@ -184,9 +184,9 @@ const Index = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    AI Model Comparison Platform
+                    AI模型对比平台
                   </h3>
-                  <p className="text-gray-600 text-sm">Experience multiple AI models and find the most suitable answers</p>
+                  <p className="text-gray-600 text-sm">体验多个AI模型，找到最适合的答案</p>
                 </div>
               </div>
               
@@ -198,7 +198,7 @@ const Index = () => {
                   className="flex items-center gap-2 bg-white/80 hover:bg-white border-blue-200 hover:border-blue-300 text-blue-700"
                 >
                   <Download size={16} />
-                  Export Data
+                  导出数据
                 </Button>
                 
                 <Button 
@@ -208,23 +208,10 @@ const Index = () => {
                   className="flex items-center gap-2 bg-white/80 hover:bg-red-50 border-red-200 hover:border-red-300 text-red-600"
                 >
                   <Trash2 size={16} />
-                  Clear History
+                  清空记录
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="mt-4 mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-200/50 backdrop-blur-sm">
-          <CardContent className="p-4 text-center">
-            <p className="text-gray-700 leading-relaxed">
-              🤖 Ask any question, compare responses from different AI models, and like your favorite answers. Your feedback helps improve AI systems!
-            </p>
-            {!user && (
-              <p className="mt-2 text-blue-600">
-                💡 <a href="/login" className="underline hover:text-blue-800 transition-colors">Login</a> to save your feedback and chat history
-              </p>
-            )}
           </CardContent>
         </Card>
         
@@ -237,7 +224,7 @@ const Index = () => {
                     <MessageSquare className="h-8 w-8" />
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Start Your AI Conversation Journey</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">开始您的AI对话之旅</h3>
                 <p className="text-gray-600">{messages[0].content}</p>
               </CardContent>
             </Card>
@@ -260,7 +247,7 @@ const Index = () => {
                     <MessageSquare size={20} />
                   </div>
                   <LoadingDots />
-                  <span className="text-gray-700 font-medium">Getting AI responses...</span>
+                  <span className="text-gray-700 font-medium">正在获取AI回复...</span>
                 </div>
               </CardContent>
             </Card>

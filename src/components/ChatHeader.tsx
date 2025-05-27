@@ -23,7 +23,7 @@ const ChatHeader: React.FC = () => {
       <div className="flex items-center space-x-6">
         <div className="flex items-center">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Chat with Models
+            AI模型对话
           </h1>
         </div>
         
@@ -32,13 +32,13 @@ const ChatHeader: React.FC = () => {
             <NavigationMenuItem>
               <Link to="/" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
                 <Home className="w-4 h-4 mr-2" />
-                Home
+                首页
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <Link to="/profile" className={cn(navigationMenuTriggerStyle(), "bg-transparent")}>
                 <Settings className="w-4 h-4 mr-2" />
-                Profile
+                个人中心
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
@@ -51,7 +51,7 @@ const ChatHeader: React.FC = () => {
             <Button variant="outline" size="sm" asChild>
               <Link to="/profile" className="flex items-center gap-1">
                 <User size={16} />
-                {user.email?.split('@')[0] || 'Profile'}
+                {user.email?.split('@')[0] || '个人中心'}
               </Link>
             </Button>
             <Button 
@@ -61,14 +61,14 @@ const ChatHeader: React.FC = () => {
               className="flex items-center gap-1"
             >
               <LogOut size={16} />
-              Logout
+              退出登录
             </Button>
           </>
         ) : (
           <Button variant="outline" size="sm" asChild>
             <Link to="/login" className="flex items-center gap-1">
               <User size={16} />
-              Login
+              登录
             </Link>
           </Button>
         )}
