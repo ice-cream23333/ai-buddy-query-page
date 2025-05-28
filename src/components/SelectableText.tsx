@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface SelectableTextProps {
   content: string;
@@ -56,11 +57,11 @@ const SelectableText: React.FC<SelectableTextProps> = ({
     <div className="relative">
       <div
         ref={textRef}
-        className="whitespace-pre-line text-gray-700 leading-relaxed select-text cursor-text"
+        className="select-text cursor-text"
         onMouseUp={handleTextSelection}
         onTouchEnd={handleTextSelection}
       >
-        {content}
+        <MarkdownRenderer content={content} />
       </div>
       
       {showFeedbackPanel && selectedText && (
