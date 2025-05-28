@@ -1,4 +1,3 @@
-
 import { ApiProvider, Message } from '@/types/chat';
 
 // Mock AI responses for different providers in English
@@ -146,7 +145,7 @@ const getSpecificResponse = (message: string, provider: ApiProvider): string | n
    - **微调**：针对具体任务（如客服、分类）用标注数据调整模型。
 
 2. **提示工程（Prompting）**  
-   - 通过设计输入提示（Prompt）引导模型生成所需输出（例如："翻译成中文：Hello → 你好"）。
+   - 通过设计输入提示（Prompt）引导模型生成所需输出（例如：“翻译成中文：Hello → 你好”）。
 
 3. **对齐与安全**  
    - 使用RLHF（基于人类反馈的强化学习）使输出更符合人类价值观。
@@ -165,7 +164,7 @@ const getSpecificResponse = (message: string, provider: ApiProvider): string | n
 ### **代表模型**
 - **GPT系列**（OpenAI）：生成任务优先，迭代至GPT-4。
 - **BERT**（Google）：双向上下文理解，适合分类任务。
-- **PaLM**（Google）、**LLaMA**（Meta）：开源或部分开放的模型。
+- **PaLM**（Google）、LLaMA（Meta）：开源或部分开放的模型。
 - **Claude**（Anthropic）、**Gemini**（Google）：注重安全与对齐。
 
 ---

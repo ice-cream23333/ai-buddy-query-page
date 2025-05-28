@@ -29,3 +29,14 @@ export interface AiResponseGroup {
   questionId: string;
   responses: Message[];
 }
+
+// Segment feedback type for detailed user feedback on specific text portions
+export interface SegmentFeedback {
+  id: string;
+  messageId: string;
+  selectedText: string;
+  feedback: 'positive' | 'negative';
+  comment?: string;
+  timestamp: number;
+  userId?: string;
+}

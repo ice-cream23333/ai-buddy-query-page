@@ -5,6 +5,8 @@ import { ThumbsUp, ThumbsDown, Bot, Sparkles, Brain, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import SelectableText from '@/components/SelectableText';
+import { toast } from '@/components/ui/sonner';
 
 interface AiResponseComparisonProps {
   question: string;
@@ -26,6 +28,16 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
     if (onRateMessage) {
       onRateMessage(messageId, rating);
     }
+  };
+
+  const handleSegmentFeedback = (messageId: string, selectedText: string, feedback: 'positive' | 'negative', comment?: string) => {
+    console.log('Segment feedback:', { messageId, selectedText, feedback, comment });
+    
+    const feedbackText = feedback === 'positive' ? '👍 感谢您对这段内容的积极反馈' : '👎 感谢您的反馈，我们会努力改进这部分内容';
+    toast.success(feedbackText);
+    
+    // Here you could save the detailed feedback to a backend service
+    // For now, we'll just log it
   };
 
   const getProviderInfo = (provider?: string) => {
@@ -76,40 +88,49 @@ const AiResponseComparison: React.FC<AiResponseComparisonProps> = ({
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="whitespace-pre-line text-gray-700 leading-relaxed mb-6 bg-white/60 p-4 rounded-lg backdrop-blur-sm">
-            {response.content}
+          <div className="mb-6 bg-white/60 p-4 rounded-lg backdrop-blur-sm">
+            <SelectableText
+              content={response.content}
+              messageId={response.id}
+              onSegmentFeedback={handleSegmentFeedback}
+            />
           </div>
-          <div className="flex justify-end space-x-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRate(response.id, 'like')}
-              className={cn(
-                "border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200",
-                response.rating === 'like' && "bg-green-50 border-green-300 text-green-700"
-              )}
-            >
-              <ThumbsUp className={cn(
-                "h-4 w-4 mr-1", 
-                response.rating === 'like' ? "text-green-600" : "text-gray-500"
-              )} />
-              <span className="text-sm">赞</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRate(response.id, 'dislike')}
-              className={cn(
-                "border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200",
-                response.rating === 'dislike' && "bg-red-50 border-red-300 text-red-700"
-              )}
-            >
-              <ThumbsDown className={cn(
-                "h-4 w-4 mr-1", 
-                response.rating === 'dislike' ? "text-red-600" : "text-gray-500"
-              )} />
-              <span className="text-sm">踩</span>
-            </Button>
+          <div className="flex justify-between items-center">
+            <div className="text-xs text-gray-500">
+              选中文本可进行详细反馈
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRate(response.id, 'like')}
+                className={cn(
+                  "border-green-200 hover:bg-green-50 hover:border-green-300 transition-all duration-200",
+                  response.rating === 'like' && "bg-green-50 border-green-300 text-green-700"
+                )}
+              >
+                <ThumbsUp className={cn(
+                  "h-4 w-4 mr-1", 
+                  response.rating === 'like' ? "text-green-600" : "text-gray-500"
+                )} />
+                <span className="text-sm">赞</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleRate(response.id, 'dislike')}
+                className={cn(
+                  "border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200",
+                  response.rating === 'dislike' && "bg-red-50 border-red-300 text-red-700"
+                )}
+              >
+                <ThumbsDown className={cn(
+                  "h-4 w-4 mr-1", 
+                  response.rating === 'dislike' ? "text-red-600" : "text-gray-500"
+                )} />
+                <span className="text-sm">踩</span>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
